@@ -399,6 +399,18 @@ func (r *Reader) ISP(ipAddress net.IP) (*ISP, error) {
 	return &val, err
 }
 
+// ISPWithNetwork takes an IP address as a net.IP struct and returns a net.IPNet struct,
+// a ISP struct and/or an error
+func (r *Reader) ISPWithNetwork(ipAddress net.IP) (*ISP, *net.IPNet, error) {
+	if isISP&r.databaseType == 0 {
+		return nil, nil, InvalidMethodError{"ISP", r.Metadata().DatabaseType}
+	}
+
+	var val ISP
+	network, _, err := r.mmdbReader.LookupNetwork(ipAddress, &val)
+	return &val, network, err
+}
+
 // Metadata takes no arguments and returns a struct containing metadata about
 // the MaxMind database in use by the Reader.
 func (r *Reader) Metadata() maxminddb.Metadata {
